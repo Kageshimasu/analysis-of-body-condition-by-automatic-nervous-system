@@ -18,6 +18,7 @@ def main():
     data = {
         'N': len(df),
         'K': 4,  # Kはカテゴリ数(今回は0,1,2,3の4つ)
+        'D': len(df.columns),
         'Y': list(df['target'] + 1),
         'is_workday': list(df['is_working']),
         'weather': weather,
@@ -35,6 +36,7 @@ def main():
         data {
             int N;
             int K;
+            int D;
             int<lower=1, upper=K> Y[N];
             int<lower=0, upper=1> is_workday[N];
             int<lower=0, upper=2> weather[N];
@@ -49,7 +51,7 @@ def main():
         }
 
         parameters {
-            matrix[K, 11] b;
+            matrix[K, D] b;
         }
 
         transformed parameters {
