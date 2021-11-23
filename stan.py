@@ -22,14 +22,14 @@ def main():
         'Y': list(df['target'] + 1),
         'is_workday': list(df['is_working']),
         'weather': weather,
-        'temperature': list(df['temperature']),
-        'air_pressure': list(df['air_pressure']),
-        'humidity': list(df['humidity']),
+        'temperature': list(df['temperature'] / 40),
+        'air_pressure': list(df['air_pressure']/ 1020) ,
+        'humidity': list(df['humidity']/ 100),
         'study_in_morning': list(df['study_in_morning']),
         'go_out': list(df['go_out']),
-        'bedtime': list(df['bedtime']),
-        'sleep_latency': list(df['sleep_latency']),
-        'sleep_duration': list(df['sleep_duration'])
+        'bedtime': list(df['bedtime'] / 30),
+        'sleep_latency': list(df['sleep_latency'] / 5),
+        'sleep_duration': list(df['sleep_duration'] / 10)
     }
 
     code = """
@@ -50,14 +50,21 @@ def main():
             real sleep_duration[N];
         }
 
+        transformed data {
+            vector[D] zeros;
+            zeros = rep_vector(0, D);
+        }
+
         parameters {
-            matrix[K, D] b;
+            matrix[D, K-1] b_raw;
         }
 
         transformed parameters {
             simplex[K] theta[N];
+            matrix[D, K] b;
+            b = append_col(zeros, b_raw);
             for (n in 1:N)
-                theta[n] = softmax(b[,1] + b[,2]*is_workday[n] + b[,3]*weather[n] + b[,4]*temperature[n] + b[,5]*air_pressure[n] + b[,6]*humidity[n] + b[,7]*study_in_morning[n] + b[,8]*go_out[n] + b[,9]*bedtime[n] + b[,10]*sleep_latency[n] + b[,11]*sleep_duration[n]);
+                theta[n] = softmax((b[1] + b[2]*is_workday[n] + b[3]*weather[n] + b[4]*temperature[n] + b[5]*air_pressure[n] + b[6]*humidity[n] + b[7]*study_in_morning[n] + b[8]*go_out[n] + b[9]*bedtime[n] + b[10]*sleep_latency[n] + b[11]*sleep_duration[n])');
         }
 
         model {
